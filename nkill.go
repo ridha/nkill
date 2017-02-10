@@ -1,8 +1,4 @@
-/*
-
- Kills all processes listening on the given TCP ports.
-
-*/
+// Kills all processes listening on the given TCP ports.
 
 package main
 
@@ -30,8 +26,14 @@ type Process struct {
 	Port  int64
 }
 
+func (p *Process) Kill() error {
+	pid, _ := strconv.Atoi(p.Pid)
+	proc, _ := os.FindProcess(pid)
+	return proc.Kill()
+}
+
+//  Read the table of tcp connections & remove header
 func readFile(tcpfile string) []string {
-	//  Read the table of tcp connections & remove header
 	content, err := ioutil.ReadFile(tcpfile)
 	if err != nil {
 		log.Fatalln(err, content)
@@ -63,9 +65,9 @@ func netstat(portToKill int64) []Process {
 	return append(tcpStats, tcp6Stats...)
 }
 
+// To get pid of all network process running on system, you must run this script
+// as superuser
 func statTCP(portToKill int64, tcpfile string) []Process {
-	// To get pid of all network process running on system, you must run this script
-	// as superuser
 	content := readFile(tcpfile)
 	var processes []Process
 
@@ -94,9 +96,9 @@ func statTCP(portToKill int64, tcpfile string) []Process {
 	return processes
 }
 
+// To retrieve the pid, check every running process and look for one using
+// the given inode
 func getPIDFromInode(inode string) string {
-	// To retrieve the pid, check every running process and look for one using
-	// the given inode
 	pid := "-"
 
 	d, err := filepath.Glob("/proc/[0-9]*/fd/[0-9]*")
@@ -124,13 +126,10 @@ func getProcessExe(pid string) string {
 func killPort(portToKill int64) {
 	killed := false
 	for _, conn := range netstat(portToKill) {
-		iport, _ := strconv.Atoi(conn.Pid)
-		p, _ := os.FindProcess(iport)
-
-		if err := p.Kill(); err != nil {
+		if err := conn.Kill(); err != nil {
 			log.Println(err)
 		} else {
-			log.Printf("Killed %s (pid: %s) listening on port %d", conn.Name, conn.Pid, iport)
+			log.Printf("Killed %s (pid: %s) listening on port %d", conn.Name, conn.Pid, conn.Port)
 			killed = true
 		}
 
@@ -150,7 +149,7 @@ func main() {
 	}
 
 	// if os.Getpid() != 0 {
-	// 	log.Println("WARNING: You are not running this script as superuser, expect some things to not work")
+	// 	log.Println("WARNING: You are not running this script as superuser.")
 	// }
 
 	for _, port := range os.Args[1:] {
