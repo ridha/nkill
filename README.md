@@ -5,8 +5,7 @@ Kills all processes listening on the given TCP ports.
 #### Install
 
 ```bash
-   $ git clone https://github.com/ridha/nkill
-   $ cd nkill; go build
+   $ go install github.com/ridha/nkill
    $ sudo ln -s /path/to/nkill /usr/bin/nkill
 ```
 
