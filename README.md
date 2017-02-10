@@ -4,9 +4,10 @@ Kills all processes listening on the given TCP ports.
 
 #### Install
 
+You need go installed and GOBIN in your PATH. Once that is done, run the command:
+
 ```bash
-   $ go install github.com/ridha/nkill
-   $ sudo ln -s /path/to/nkill /usr/bin/nkill
+   $ go get -u github.com/ridha/nkill
 ```
 
 #### Usage
